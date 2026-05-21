@@ -104,7 +104,7 @@ export async function getGalleryItems(folder: string): Promise<GalleryItem[]> {
     }
 
     const pairs: BeforeAfterPair[] = []
-    for (const [id, { beforeRes, afterRes }] of pairsMap) {
+    for (const [id, { beforeRes, afterRes }] of Array.from(pairsMap)) {
       if (beforeRes && afterRes) {
         pairs.push({
           type: 'before-after' as const,
