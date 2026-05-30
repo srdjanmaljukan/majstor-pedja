@@ -1,38 +1,52 @@
-'use client'
+"use client";
 
-import { useState, useRef, useCallback, useEffect } from 'react'
-import Image from 'next/image'
-import { GalleryItem, GalleryImage, BeforeAfterPair } from '@/lib/cloudinary'
+import { useState, useRef, useCallback, useEffect } from "react";
+import Image from "next/image";
+import { GalleryItem, GalleryImage, BeforeAfterPair } from "@/lib/cloudinary";
 
 // ─── Before/After Slider ────────────────────────────────────────────────────
 
 function BeforeAfterSlider({ item }: { item: BeforeAfterPair }) {
-  const [sliderX, setSliderX] = useState(50)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const dragging = useRef(false)
+  const [sliderX, setSliderX] = useState(50);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
 
   const updateSlider = useCallback((clientX: number) => {
-    if (!containerRef.current) return
-    const rect = containerRef.current.getBoundingClientRect()
-    const pct = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100))
-    setSliderX(pct)
-  }, [])
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const pct = Math.min(
+      100,
+      Math.max(0, ((clientX - rect.left) / rect.width) * 100),
+    );
+    setSliderX(pct);
+  }, []);
 
-  const onMouseDown = () => { dragging.current = true }
-  const onMouseUp   = () => { dragging.current = false }
-  const onMouseMove = (e: React.MouseEvent) => { if (dragging.current) updateSlider(e.clientX) }
-  const onTouchMove = (e: React.TouchEvent) => { updateSlider(e.touches[0].clientX) }
+  const onMouseDown = () => {
+    dragging.current = true;
+  };
+  const onMouseUp = () => {
+    dragging.current = false;
+  };
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (dragging.current) updateSlider(e.clientX);
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    updateSlider(e.touches[0].clientX);
+  };
 
   useEffect(() => {
-    const up = () => { dragging.current = false }
-    window.addEventListener('mouseup', up)
-    return () => window.removeEventListener('mouseup', up)
-  }, [])
+    const up = () => {
+      dragging.current = false;
+    };
+    window.addEventListener("mouseup", up);
+    return () => window.removeEventListener("mouseup", up);
+  }, []);
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-square overflow-hidden rounded-xl select-none cursor-col-resize"
+      className="relative w-full overflow-hidden rounded-xl select-none cursor-col-resize"
+      style={{ aspectRatio: `${item.width} / ${item.height}` }}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
@@ -66,7 +80,7 @@ function BeforeAfterSlider({ item }: { item: BeforeAfterPair }) {
       {/* Linija */}
       <div
         className="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_8px_rgba(0,0,0,0.6)] pointer-events-none"
-        style={{ left: `${sliderX}%`, transform: 'translateX(-50%)' }}
+        style={{ left: `${sliderX}%`, transform: "translateX(-50%)" }}
       />
 
       {/* Handle */}
@@ -74,8 +88,18 @@ function BeforeAfterSlider({ item }: { item: BeforeAfterPair }) {
         className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center pointer-events-none"
         style={{ left: `${sliderX}%` }}
       >
-        <svg className="w-4 h-4 text-[#0D1B2A]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l-3 3 3 3M16 9l3 3-3 3" />
+        <svg
+          className="w-4 h-4 text-[#0D1B2A]"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2.5}
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M8 9l-3 3 3 3M16 9l3 3-3 3"
+          />
         </svg>
       </div>
 
@@ -87,17 +111,25 @@ function BeforeAfterSlider({ item }: { item: BeforeAfterPair }) {
         Poslije
       </div>
     </div>
-  )
+  );
 }
 
 // ─── Lightbox ───────────────────────────────────────────────────────────────
 
-function Lightbox({ item, onClose }: { item: GalleryItem; onClose: () => void }) {
+function Lightbox({
+  item,
+  onClose,
+}: {
+  item: GalleryItem;
+  onClose: () => void;
+}) {
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', handler)
-    return () => document.removeEventListener('keydown', handler)
-  }, [onClose])
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
 
   return (
     <div
@@ -108,10 +140,10 @@ function Lightbox({ item, onClose }: { item: GalleryItem; onClose: () => void })
         className="relative max-w-4xl w-full max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {item.type === 'single' ? (
+        {item.type === "single" ? (
           <Image
             src={item.secure_url}
-            alt={item.caption || 'Rad'}
+            alt={item.caption || "Rad"}
             width={item.width}
             height={item.height}
             className="object-contain max-h-[85vh] w-full rounded-xl"
@@ -124,7 +156,9 @@ function Lightbox({ item, onClose }: { item: GalleryItem; onClose: () => void })
         )}
 
         {item.caption && (
-          <p className="text-white/60 text-sm text-center mt-3">{item.caption}</p>
+          <p className="text-white/60 text-sm text-center mt-3">
+            {item.caption}
+          </p>
         )}
 
         <button
@@ -135,18 +169,18 @@ function Lightbox({ item, onClose }: { item: GalleryItem; onClose: () => void })
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 // ─── Gallery ────────────────────────────────────────────────────────────────
 
 interface GalleryProps {
-  items: GalleryItem[]
+  items: GalleryItem[];
 }
 
 export default function Gallery({ items }: GalleryProps) {
-  const [selected, setSelected] = useState<GalleryItem | null>(null)
-  const isEmpty = !items || items.length === 0
+  const [selected, setSelected] = useState<GalleryItem | null>(null);
+  const isEmpty = !items || items.length === 0;
 
   return (
     <section id="galerija" className="py-24 bg-[#0D1B2A]">
@@ -177,8 +211,8 @@ export default function Gallery({ items }: GalleryProps) {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {items.map((item) => (
-              <div key={item.type === 'single' ? item.public_id : item.id}>
-                {item.type === 'single' ? (
+              <div key={item.type === "single" ? item.public_id : item.id}>
+                {item.type === "single" ? (
                   // Klikabilna single slika
                   <button
                     className="w-full aspect-square relative overflow-hidden rounded-xl group cursor-pointer"
@@ -186,7 +220,7 @@ export default function Gallery({ items }: GalleryProps) {
                   >
                     <Image
                       src={(item as GalleryImage).secure_url}
-                      alt={item.caption || 'Rad'}
+                      alt={item.caption || "Rad"}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                       sizes="(max-width: 768px) 50vw, 33vw"
@@ -204,7 +238,9 @@ export default function Gallery({ items }: GalleryProps) {
                 )}
 
                 {item.caption && (
-                  <p className="text-white/40 text-xs mt-2 px-1 truncate">{item.caption}</p>
+                  <p className="text-white/40 text-xs mt-2 px-1 truncate">
+                    {item.caption}
+                  </p>
                 )}
               </div>
             ))}
@@ -212,7 +248,9 @@ export default function Gallery({ items }: GalleryProps) {
         )}
       </div>
 
-      {selected && <Lightbox item={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <Lightbox item={selected} onClose={() => setSelected(null)} />
+      )}
     </section>
-  )
+  );
 }
