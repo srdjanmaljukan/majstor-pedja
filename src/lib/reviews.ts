@@ -1,6 +1,4 @@
-// ============================================================
-// Reviews - čuvanje i čitanje iz Vercel KV
-// ============================================================
+import { neon } from '@neondatabase/serverless'
 
 export interface Review {
   id: string
@@ -12,16 +10,35 @@ export interface Review {
   createdAt: string
 }
 
-async function getKV() {
-  const { kv } = await import('@vercel/kv')
-  return kv
+function getDb() {
+  const url = process.env.DATABASE_URL
+  if (!url) throw new Error('DATABASE_URL nije postavljen')
+  return neon(url)
+}
+
+async function ensureTable() {
+  const sql = getDb()
+  await sql`
+    CREATE TABLE IF NOT EXISTS reviews (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      location TEXT,
+      text TEXT NOT NULL,
+      rating INTEGER NOT NULL,
+      approved BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `
 }
 
 export async function getApprovedReviews(): Promise<Review[]> {
   try {
-    const kv = await getKV()
-    const reviews = await kv.get<Review[]>('reviews') ?? []
-    return reviews.filter((r) => r.approved)
+    await ensureTable()
+    const sql = getDb()
+    const rows = await sql`
+      SELECT * FROM reviews WHERE approved = TRUE ORDER BY created_at DESC
+    `
+    return rows.map(rowToReview)
   } catch {
     return []
   }
@@ -29,36 +46,48 @@ export async function getApprovedReviews(): Promise<Review[]> {
 
 export async function getAllReviews(): Promise<Review[]> {
   try {
-    const kv = await getKV()
-    return await kv.get<Review[]>('reviews') ?? []
+    await ensureTable()
+    const sql = getDb()
+    const rows = await sql`
+      SELECT * FROM reviews ORDER BY created_at DESC
+    `
+    return rows.map(rowToReview)
   } catch {
     return []
   }
 }
 
-export async function addReview(data: Omit<Review, 'id' | 'approved' | 'createdAt'>): Promise<Review> {
-  const kv = await getKV()
-  const reviews = await kv.get<Review[]>('reviews') ?? []
-
-  const newReview: Review = {
-    ...data,
-    id: `${Date.now()}`,
-    approved: false,
-    createdAt: new Date().toISOString(),
-  }
-
-  await kv.set('reviews', [newReview, ...reviews])
-  return newReview
+export async function addReview(
+  data: Omit<Review, 'id' | 'approved' | 'createdAt'>
+): Promise<Review> {
+  await ensureTable()
+  const sql = getDb()
+  const id = `${Date.now()}`
+  await sql`
+    INSERT INTO reviews (id, name, location, text, rating)
+    VALUES (${id}, ${data.name}, ${data.location}, ${data.text}, ${data.rating})
+  `
+  return { ...data, id, approved: false, createdAt: new Date().toISOString() }
 }
 
 export async function approveReview(id: string): Promise<void> {
-  const kv = await getKV()
-  const reviews = await kv.get<Review[]>('reviews') ?? []
-  await kv.set('reviews', reviews.map((r) => r.id === id ? { ...r, approved: true } : r))
+  const sql = getDb()
+  await sql`UPDATE reviews SET approved = TRUE WHERE id = ${id}`
 }
 
 export async function deleteReview(id: string): Promise<void> {
-  const kv = await getKV()
-  const reviews = await kv.get<Review[]>('reviews') ?? []
-  await kv.set('reviews', reviews.filter((r) => r.id !== id))
+  const sql = getDb()
+  await sql`DELETE FROM reviews WHERE id = ${id}`
+}
+
+function rowToReview(row: Record<string, unknown>): Review {
+  return {
+    id: row.id as string,
+    name: row.name as string,
+    location: (row.location as string) || '',
+    text: row.text as string,
+    rating: row.rating as number,
+    approved: row.approved as boolean,
+    createdAt: row.created_at as string,
+  }
 }
