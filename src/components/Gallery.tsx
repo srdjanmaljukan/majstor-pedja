@@ -238,7 +238,7 @@ export default function Gallery({ items }: GalleryProps) {
                 ) : (
                   // Before/after slider direktno u gridu + klik za lightbox
                   <div
-                    className="cursor-pointer"
+                    className="aspect-square cursor-pointer overflow-hidden rounded-xl"
                     onClick={() => setSelected(item)}
                   >
                     <BeforeAfterSlider item={item as BeforeAfterPair} />
