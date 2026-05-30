@@ -6,7 +6,13 @@ import { GalleryItem, GalleryImage, BeforeAfterPair } from "@/lib/cloudinary";
 
 // ─── Before/After Slider ────────────────────────────────────────────────────
 
-function BeforeAfterSlider({ item }: { item: BeforeAfterPair }) {
+function BeforeAfterSlider({
+  item,
+  natural = false,
+}: {
+  item: BeforeAfterPair;
+  natural?: boolean;
+}) {
   const [sliderX, setSliderX] = useState(50);
   const containerRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
@@ -46,7 +52,9 @@ function BeforeAfterSlider({ item }: { item: BeforeAfterPair }) {
     <div
       ref={containerRef}
       className="relative w-full overflow-hidden rounded-xl select-none cursor-col-resize"
-      style={{ aspectRatio: `${item.width} / ${item.height}` }}
+      style={
+        natural ? { aspectRatio: `${item.width} / ${item.height}` } : undefined
+      }
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
@@ -151,7 +159,7 @@ function Lightbox({
         ) : (
           // Slider u lightboxu — veći format
           <div className="w-full max-w-2xl mx-auto">
-            <BeforeAfterSlider item={item} />
+            <BeforeAfterSlider item={item as BeforeAfterPair} natural />
           </div>
         )}
 
