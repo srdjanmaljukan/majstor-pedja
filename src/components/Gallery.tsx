@@ -51,7 +51,7 @@ function BeforeAfterSlider({
   return (
     <div
       ref={containerRef}
-      className="relative w-full overflow-hidden rounded-xl select-none cursor-col-resize"
+      className="relative w-full h-full overflow-hidden rounded-xl select-none cursor-col-resize"
       style={
         natural ? { aspectRatio: `${item.width} / ${item.height}` } : undefined
       }
