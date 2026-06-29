@@ -36,6 +36,11 @@ Svaki posao završim kako bih i za svoju kuću uradio.`,
       name: 'Baštenski radovi',
       description: 'Košenje trave, orezivanje žive ograde, održavanje dvorišta.',
     },
+    {
+      icon: '𖣘',
+      name: 'Klima uređaji',
+      description: 'Ugradnja, montiranje, popravka i servis klima uređaja.',
+    },
   ],
 
   // Recenzije
