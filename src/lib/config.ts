@@ -39,7 +39,7 @@ Svaki posao završim kako bih i za svoju kuću uradio.`,
     {
       icon: '𖣘',
       name: 'Klima uređaji',
-      description: 'Ugradnja, montiranje, popravka i servis klima uređaja.',
+      description: 'Montaža novih, demontaža starih, popravka i servis klima uređaja.',
     },
   ],
 
